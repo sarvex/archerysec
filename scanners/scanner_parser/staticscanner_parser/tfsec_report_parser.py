@@ -76,11 +76,7 @@ def tfsec_report_json(data, project_id, scan_id, username):
             )
             fp_lenth_match = len(false_p)
 
-            if fp_lenth_match == 1:
-                false_positive = "Yes"
-            else:
-                false_positive = "No"
-
+            false_positive = "Yes" if fp_lenth_match == 1 else "No"
             save_all = StaticScanResultsDb(
                 vuln_id=vul_id,
                 scan_id=scan_id,
@@ -99,8 +95,6 @@ def tfsec_report_json(data, project_id, scan_id, username):
                 username=username,
                 scanner='Tfsec'
             )
-            save_all.save()
-
         else:
             duplicate_vuln = "Yes"
 
@@ -122,7 +116,7 @@ def tfsec_report_json(data, project_id, scan_id, username):
                 username=username,
                 scanner='Tfsec'
             )
-            save_all.save()
+        save_all.save()
 
     all_findbugs_data = StaticScanResultsDb.objects.filter(
         username=username, scan_id=scan_id, false_positive="No"
@@ -148,12 +142,7 @@ def tfsec_report_json(data, project_id, scan_id, username):
         scanner='Tfsec'
     )
     trend_update(username=username)
-    subject = "Archery Tool Scan Status - tfsec Report Uploaded"
-    message = (
-        "tfsec Scanner has completed the scan "
-        "  %s <br> Total: %s <br>High: %s <br>"
-        "Medium: %s <br>Low %s"
-        % ("tfsec", total_vul, total_high, total_medium, total_low)
-    )
+    message = f"tfsec Scanner has completed the scan   tfsec <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - tfsec Report Uploaded"
     email_sch_notify(subject=subject, message=message)

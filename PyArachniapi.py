@@ -99,7 +99,7 @@ class arachniAPI(object):
         :param id:
         :return:
         """
-        return self._request("GET", "/scans/%s" % id)
+        return self._request("GET", f"/scans/{id}")
 
     def scan_summary(self, id):
         """
@@ -107,7 +107,7 @@ class arachniAPI(object):
         :param id:
         :return:
         """
-        return self._request("GET", "/scans/%s/summary" % id)
+        return self._request("GET", f"/scans/{id}/summary")
 
     def scan_pause(self, id):
         """
@@ -116,7 +116,7 @@ class arachniAPI(object):
         :return:
         """
 
-        return self._request("PUT", "/scans/%s/pause" % id)
+        return self._request("PUT", f"/scans/{id}/pause")
 
     def scan_resume(self, id):
 
@@ -124,13 +124,13 @@ class arachniAPI(object):
         :param id:
         :return:
         """
-        return self._request("PUT", "/scans/%s/resume" % id)
+        return self._request("PUT", f"/scans/{id}/resume")
 
     def scan_xml_report(self, id):
         """
         :return:
         """
-        return self._request("GET", "/scans/%s/report.xml" % id)
+        return self._request("GET", f"/scans/{id}/report.xml")
 
     def stop_scan(self, id):
         """
@@ -148,20 +148,31 @@ class arachniAPI(object):
         # set default headers
         if not headers:
             headers = {"accept": "*/*"}
-            if method == "POST" or method == "PUT":
-                headers.update({"Content-Type": "application/json"})
+            if method in ["POST", "PUT"]:
+                headers["Content-Type"] = "application/json"
         try:
             if self.username_api != "":
-                response = requests.request(method=method, url=self.host + ':' + self.port + url, params=params,
-                                            headers=headers, data=data, auth=(self.username_api, self.password_api))
+                response = requests.request(
+                    method=method,
+                    url=f'{self.host}:{self.port}{url}',
+                    params=params,
+                    headers=headers,
+                    data=data,
+                    auth=(self.username_api, self.password_api),
+                )
             else:
-                response = requests.request(method=method, url=self.host + ':' + self.port + url, params=params,
-                                            headers=headers, data=data)
+                response = requests.request(
+                    method=method,
+                    url=f'{self.host}:{self.port}{url}',
+                    params=params,
+                    headers=headers,
+                    data=data,
+                )
             try:
                 response.raise_for_status()
 
                 response_code = response.status_code
-                success = True if response_code // 100 == 2 else False
+                success = response_code // 100 == 2
                 if response.text:
                     try:
                         data = response.json()
@@ -176,7 +187,7 @@ class arachniAPI(object):
             except ValueError as e:
                 return arachniResponse(
                     success=False,
-                    message="JSON response could not be decoded {}.".format(e),
+                    message=f"JSON response could not be decoded {e}.",
                 )
             except requests.exceptions.HTTPError as e:
                 if response.status_code == 400:
@@ -185,13 +196,11 @@ class arachniAPI(object):
                     )
                 else:
                     return arachniResponse(
-                        message="There was an error while handling the request. {}".format(
-                            response.content
-                        ),
+                        message=f"There was an error while handling the request. {response.content}",
                         success=False,
                     )
         except Exception as e:
-            return arachniResponse(success=False, message="Eerror is %s" % e)
+            return arachniResponse(success=False, message=f"Eerror is {e}")
 
 
 class arachniResponse(object):
@@ -204,10 +213,7 @@ class arachniResponse(object):
         self.data = data
 
     def __str__(self):
-        if self.data:
-            return str(self.data)
-        else:
-            return self.message
+        return str(self.data) if self.data else self.message
 
     def data_json(self, pintu=False):
         """Returns the data as a valid JSON String."""

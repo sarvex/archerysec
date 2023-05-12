@@ -41,7 +41,7 @@ from webscanners.models import (WebScanResultsDb, WebScansDb, cookie_db,
 # ZAP Database import
 
 # Global Variables
-setting_file = os.getcwd() + "/apidata.json"
+setting_file = f"{os.getcwd()}/apidata.json"
 # zap_setting = load_settings.ArcherySettings(setting_file, username=username)
 zap_api_key = "dwed23wdwedwwefw4rwrfw"
 zap_hosts = "0.0.0.0"
@@ -94,7 +94,7 @@ def zap_local():
         "-config",
         "api.disablekey=false",
         "-config",
-        "api.key=" + zap_api_key,
+        f"api.key={zap_api_key}",
         "-port",
         random_port,
         "-host",
@@ -105,7 +105,7 @@ def zap_local():
         "api.addrs.addr.regex=true",
     ]
 
-    log_path = os.getcwd() + "/" + "zap.log"
+    log_path = f"{os.getcwd()}/zap.log"
 
     with open(log_path, "w+") as log_file:
         subprocess.Popen(
@@ -140,8 +140,8 @@ def zap_connect(random_port, username):
     zap = ZAPv2(
         apikey=zap_api_key,
         proxies={
-            "http": "http://" + zap_hosts + ":" + str(zap_ports),
-            "https": "https://" + zap_hosts + ":" + str(zap_ports),
+            "http": f"http://{zap_hosts}:{str(zap_ports)}",
+            "https": f"https://{zap_hosts}:{str(zap_ports)}",
         },
     )
     return zap
@@ -541,13 +541,9 @@ class ZAPScanner:
                 elif risk == "Medium":
                     vul_col = "warning"
                     risk = "Medium"
-                elif risk == "info":
-                    vul_col = "info"
-                    risk = "Low"
                 else:
                     vul_col = "info"
                     risk = "Low"
-
                 dup_data = name + risk + target_url
                 duplicate_hash = hashlib.sha256(dup_data.encode("utf-8")).hexdigest()
                 match_dup = (
@@ -580,7 +576,6 @@ class ZAPScanner:
                         scanner="Zap",
                         username=username,
                     )
-                    dump_data.save()
                 else:
                     duplicate_vuln = "Yes"
 
@@ -604,18 +599,13 @@ class ZAPScanner:
                         scanner="Zap",
                         username=username,
                     )
-                    dump_data.save()
-
+                dump_data.save()
                 false_p = WebScanResultsDb.objects.filter(
                     false_positive_hash=duplicate_hash
                 )
                 fp_lenth_match = len(false_p)
 
-                if fp_lenth_match == 1:
-                    false_positive = "Yes"
-                else:
-                    false_positive = "No"
-
+                false_positive = "Yes" if fp_lenth_match == 1 else "No"
                 vul_dat = WebScanResultsDb.objects.filter(
                     username=username, vuln_id=vuln_id, scanner="Zap"
                 )
@@ -624,7 +614,7 @@ class ZAPScanner:
                     key = "Evidence"
                     value = data.instance
                     dd = re.sub(r"<[^>]*>", " ", value)
-                    instance = key + ": " + dd
+                    instance = f"{key}: {dd}"
                     full_data.append(instance)
                 removed_list_data = ",".join(full_data)
                 WebScanResultsDb.objects.filter(

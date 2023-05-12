@@ -128,12 +128,7 @@ def inspec_report_json(data, project_id, scan_id, username):
                 inspec_skipped=inspec_skipped,
                 total_dup=total_duplicate,
             )
-            subject = "Archery Tool Scan Status - Inspec Report Uploaded"
-            message = (
-                "Inspec Scanner has completed the scan "
-                "  %s <br> Total: %s <br>Failed: %s <br>"
-                "failed: %s <br>Skipped %s"
-                % (scan_id, total_vul, inspec_failed, inspec_failed, inspec_skipped)
-            )
+            message = f"Inspec Scanner has completed the scan   {scan_id} <br> Total: {total_vul} <br>Failed: {inspec_failed} <br>failed: {inspec_failed} <br>Skipped {inspec_skipped}"
 
+            subject = "Archery Tool Scan Status - Inspec Report Uploaded"
             email_sch_notify(subject=subject, message=message)

@@ -167,8 +167,10 @@ def list_vuln_info(request):
             total_dup=total_dup
         )
         return HttpResponseRedirect(
-            reverse("staticscanners:list_vuln_info") + "?scan_id=%s&scan_name=%s&scanner=%s" % (
-                scan_id, vuln_name, scanner)
+            (
+                reverse("staticscanners:list_vuln_info")
+                + f"?scan_id={scan_id}&scan_name={vuln_name}&scanner={scanner}"
+            )
         )
 
     vuln_data = StaticScanResultsDb.objects.filter(
@@ -271,7 +273,8 @@ def vuln_delete(request):
             info_vul=total_info,
         )
         return HttpResponseRedirect(
-            reverse("staticscanners:list_vuln") + "?scan_id=%s&scanner=%s" % (scan_id, scanner)
+            reverse("staticscanners:list_vuln")
+            + f"?scan_id={scan_id}&scanner={scanner}"
         )
 
 
@@ -345,10 +348,6 @@ def upload(project_name, scan_id, date_time, project_id, scan_status, scanner, u
         )
     elif scanner == 'Gitlabsca':
         gitlabsast_report_json(
-            data=data, project_id=project_id, scan_id=scan_id, username=username
-        )
-    elif scanner == 'Gitlabsca':
-        gitlabsca_report_json(
             data=data, project_id=project_id, scan_id=scan_id, username=username
         )
     elif scanner == 'Twistlock':

@@ -42,11 +42,7 @@ def list_vuln(request):
     all_passed = ""
     all_skipped = ""
     username = request.user.username
-    if request.method == "GET":
-        scan_id = request.GET["scan_id"]
-    else:
-        scan_id = None
-
+    scan_id = request.GET["scan_id"] if request.method == "GET" else None
     dockle_all_vuln = dockle_scan_results_db.objects.filter(
         username=username, scan_id=scan_id
     )
@@ -110,8 +106,10 @@ def dockle_vuln_data(request):
                 )
 
         return HttpResponseRedirect(
-            reverse("dockle:dockle_vuln_data")
-            + "?scan_id=%s&test_name=%s" % (scan_id, vuln_id)
+            (
+                reverse("dockle:dockle_vuln_data")
+                + f"?scan_id={scan_id}&test_name={vuln_id}"
+            )
         )
 
     dockle_vuln_data = dockle_scan_results_db.objects.filter(
@@ -242,7 +240,7 @@ def dockle_del_vuln(request):
         )
 
         return HttpResponseRedirect(
-            reverse("dockle:dockle_all_vuln" + "?scan_id=%s" % scan_id)
+            reverse(f"dockle:dockle_all_vuln?scan_id={scan_id}")
         )
 
 
@@ -251,26 +249,27 @@ def export(request):
     :param request:
     :return:
     """
+    if request.method != "POST":
+        return
+    scan_id = request.POST.get("scan_id")
+    report_type = request.POST.get("type")
+
+    dockle_resource = dockleResource()
     username = request.user.username
 
-    if request.method == "POST":
-        scan_id = request.POST.get("scan_id")
-        report_type = request.POST.get("type")
-
-        dockle_resource = dockleResource()
-        queryset = dockle_scan_results_db.objects.filter(
-            username=username, scan_id=scan_id
-        )
-        dataset = dockle_resource.export(queryset)
-        if report_type == "csv":
-            response = HttpResponse(dataset.csv, content_type="text/csv")
-            response["Content-Disposition"] = 'attachment; filename="%s.csv"' % scan_id
-            return response
-        if report_type == "json":
-            response = HttpResponse(dataset.json, content_type="application/json")
-            response["Content-Disposition"] = 'attachment; filename="%s.json"' % scan_id
-            return response
-        if report_type == "yaml":
-            response = HttpResponse(dataset.yaml, content_type="application/x-yaml")
-            response["Content-Disposition"] = 'attachment; filename="%s.yaml"' % scan_id
-            return response
+    queryset = dockle_scan_results_db.objects.filter(
+        username=username, scan_id=scan_id
+    )
+    dataset = dockle_resource.export(queryset)
+    if report_type == "csv":
+        response = HttpResponse(dataset.csv, content_type="text/csv")
+        response["Content-Disposition"] = f'attachment; filename="{scan_id}.csv"'
+        return response
+    if report_type == "json":
+        response = HttpResponse(dataset.json, content_type="application/json")
+        response["Content-Disposition"] = f'attachment; filename="{scan_id}.json"'
+        return response
+    if report_type == "yaml":
+        response = HttpResponse(dataset.yaml, content_type="application/x-yaml")
+        response["Content-Disposition"] = f'attachment; filename="{scan_id}.yaml"'
+        return response

@@ -80,7 +80,7 @@ def trend_update(username):
 
         for data in all_month_data_display:
             current_month = datetime.datetime.now().month
-            if int(current_month) == 1:
+            if current_month == 1:
                 month_db.objects.filter(username=username, project_id=proj_id, month='2').delete()
                 month_db.objects.filter(username=username, project_id=proj_id, month='3').delete()
                 month_db.objects.filter(username=username, project_id=proj_id, month='4').delete()
@@ -99,7 +99,7 @@ def trend_update(username):
                                     medium=medium, low=low)
                 add_data.save()
 
-            elif int(data.month) == int(current_month):
+            elif int(data.month) == current_month:
                 month_db.objects.filter(username=username, project_id=proj_id, month=current_month).update(high=high,
                                                                                                            medium=medium,
                                                                                                            low=low)
@@ -238,11 +238,7 @@ def proj_data(request):
     """
     username = request.user.username
     all_project = project_db.objects.filter(username=username)
-    if request.GET['project_id']:
-        project_id = request.GET['project_id']
-    else:
-        project_id = ''
-
+    project_id = request.GET['project_id'] if request.GET['project_id'] else ''
     project_dat = project_db.objects.filter(username=username, project_id=project_id)
     web_scan_dat = WebScansDb.objects.filter(username=username, project_id=project_id)
     static_scan = StaticScansDb.objects.filter(username=username, project_id=project_id)
@@ -341,27 +337,44 @@ def all_high_vuln(request):
         net_all_high = NetworkScanResultsDb.objects.filter(username=username, vuln_status='Closed')
         pentest_all_high = manual_scan_results_db.objects.filter(username=username)
 
-    # add your scanner name here <scannername>
     elif severity == 'All_False_Positive':
         web_all_high = WebScanResultsDb.objects.filter(username=username, false_positive='Yes')
         sast_all_high = StaticScanResultsDb.objects.filter(username=username, false_positive='Yes')
         net_all_high = NetworkScanResultsDb.objects.filter(username=username, false_positive='Yes')
         pentest_all_high = manual_scan_results_db.objects.filter(username=username)
 
-    elif severity == 'Network':
-        net_all_high = NetworkScanResultsDb.objects.filter(username=username, false_positive='No')
+    elif severity == 'Close':
+        # add your scanner name here <scannername>
+        web_all_high = WebScanResultsDb.objects.filter(username=username,
+                                                       project_id=project_id,
+                                                       vuln_status='Closed')
+        sast_all_high = StaticScanResultsDb.objects.filter(username=username,
+                                                           project_id=project_id,
+                                                           vuln_status='Closed')
+        net_all_high = NetworkScanResultsDb.objects.filter(username=username,
+                                                              project_id=project_id,
+                                                              vuln_status='Closed')
 
-    elif severity == 'Web':
-        web_all_high = WebScanResultsDb.objects.filter(username=username, false_positive='No')
-        pentest_all_high = manual_scan_results_db.objects.filter(username=username, pentest_type='web')
+        pentest_all_high = manual_scan_results_db.objects.filter(username=username,
+                                                                 project_id=project_id,
 
-    # add your scanner name here <scannername>
-    elif severity == 'Static':
-        sast_all_high = StaticScanResultsDb.objects.filter(username=username, false_positive='No')
-        pentest_all_high = manual_scan_results_db.objects.filter(username=username, pentest_type='static')
+                                                                 vuln_status='Closed')
+
+    elif severity == 'False':
+        # add your scanner name here <scannername>
+        web_all_high = WebScanResultsDb.objects.filter(username=username,
+                                                       project_id=project_id,
+                                                       false_positive='Yes')
+        sast_all_high = StaticScanResultsDb.objects.filter(username=username,
+                                                           project_id=project_id,
+                                                           false_positive='Yes')
+        net_all_high = NetworkScanResultsDb.objects.filter(username=username,
+                                                              project_id=project_id,
+                                                              false_positive='Yes')
+
+        pentest_all_high = ''
 
     elif severity == 'High':
-
         # add your scanner name here <scannername>
 
         web_all_high = WebScanResultsDb.objects.filter(username=username,
@@ -381,26 +394,6 @@ def all_high_vuln(request):
                                                                  severity='High',
                                                                  project_id=project_id)
 
-    elif severity == 'Medium':
-
-        # All Medium
-
-        # add your scanner name here <scannername>
-
-        web_all_high = WebScanResultsDb.objects.filter(username=username,
-                                                       project_id=project_id,
-                                                       severity='Medium')
-        sast_all_high = StaticScanResultsDb.objects.filter(username=username,
-                                                           project_id=project_id,
-                                                           severity='Medium')
-        net_all_high = NetworkScanResultsDb.objects.filter(username=username,
-                                                           project_id=project_id,
-                                                           severity='Medium')
-
-        pentest_all_high = manual_scan_results_db.objects.filter(username=username, severity='Medium',
-                                                                 project_id=project_id)
-
-    # All Low
     elif severity == 'Low':
         # add your scanner name here <scannername>
 
@@ -418,6 +411,31 @@ def all_high_vuln(request):
                                                                  severity='Low',
                                                                  project_id=project_id)
 
+    elif severity == 'Medium':
+        # All Medium
+
+        # add your scanner name here <scannername>
+
+        web_all_high = WebScanResultsDb.objects.filter(username=username,
+                                                       project_id=project_id,
+                                                       severity='Medium')
+        sast_all_high = StaticScanResultsDb.objects.filter(username=username,
+                                                           project_id=project_id,
+                                                           severity='Medium')
+        net_all_high = NetworkScanResultsDb.objects.filter(username=username,
+                                                           project_id=project_id,
+                                                           severity='Medium')
+
+        pentest_all_high = manual_scan_results_db.objects.filter(username=username, severity='Medium',
+                                                                 project_id=project_id)
+
+    elif severity == 'Network':
+        net_all_high = NetworkScanResultsDb.objects.filter(username=username, false_positive='No')
+
+    elif severity == 'Static':
+        sast_all_high = StaticScanResultsDb.objects.filter(username=username, false_positive='No')
+        pentest_all_high = manual_scan_results_db.objects.filter(username=username, pentest_type='static')
+
     elif severity == 'Total':
         # add your scanner name here <scannername>
         web_all_high = WebScanResultsDb.objects.filter(username=username,
@@ -431,39 +449,14 @@ def all_high_vuln(request):
 
         pentest_all_high = manual_scan_results_db.objects.filter(username=username, project_id=project_id)
 
-    elif severity == 'False':
-        # add your scanner name here <scannername>
-        web_all_high = WebScanResultsDb.objects.filter(username=username,
-                                                       project_id=project_id,
-                                                       false_positive='Yes')
-        sast_all_high = StaticScanResultsDb.objects.filter(username=username,
-                                                           project_id=project_id,
-                                                           false_positive='Yes')
-        net_all_high = NetworkScanResultsDb.objects.filter(username=username,
-                                                              project_id=project_id,
-                                                              false_positive='Yes')
-
-        pentest_all_high = ''
-
-    elif severity == 'Close':
-        # add your scanner name here <scannername>
-        web_all_high = WebScanResultsDb.objects.filter(username=username,
-                                                       project_id=project_id,
-                                                       vuln_status='Closed')
-        sast_all_high = StaticScanResultsDb.objects.filter(username=username,
-                                                           project_id=project_id,
-                                                           vuln_status='Closed')
-        net_all_high = NetworkScanResultsDb.objects.filter(username=username,
-                                                              project_id=project_id,
-                                                              vuln_status='Closed')
-
-        pentest_all_high = manual_scan_results_db.objects.filter(username=username,
-                                                                 project_id=project_id,
-
-                                                                 vuln_status='Closed')
+    elif severity == 'Web':
+        web_all_high = WebScanResultsDb.objects.filter(username=username, false_positive='No')
+        pentest_all_high = manual_scan_results_db.objects.filter(username=username, pentest_type='web')
 
     else:
-        return HttpResponseRedirect(reverse('dashboard:proj_data' + '?project_id=%s' % project_id))
+        return HttpResponseRedirect(
+            reverse(f'dashboard:proj_data?project_id={project_id}')
+        )
 
     # add your scanner name here <scannername>
     return render(request,
@@ -483,24 +476,25 @@ def export(request):
     :param request:
     :return:
     """
+    if request.method != 'POST':
+        return
+    project_id = request.POST.get("project_id")
+    report_type = request.POST.get("type")
+    severity = request.POST.get("severity")
+
+    resource = AllResource()
+
     username = request.user.username
 
-    if request.method == 'POST':
-        project_id = request.POST.get("project_id")
-        report_type = request.POST.get("type")
-        severity = request.POST.get("severity")
+    all_data = scans_query.all_vuln_count(username=username, project_id=project_id, query=severity)
 
-        resource = AllResource()
+    dataset = resource.export(all_data)
 
-        all_data = scans_query.all_vuln_count(username=username, project_id=project_id, query=severity)
-
-        dataset = resource.export(all_data)
-
-        if report_type == 'csv':
-            response = HttpResponse(dataset.csv, content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="%s.csv"' % project_id
-            return response
-        if report_type == 'json':
-            response = HttpResponse(dataset.json, content_type='application/json')
-            response['Content-Disposition'] = 'attachment; filename="%s.json"' % project_id
-            return response
+    if report_type == 'csv':
+        response = HttpResponse(dataset.csv, content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{project_id}.csv"'
+        return response
+    if report_type == 'json':
+        response = HttpResponse(dataset.json, content_type='application/json')
+        response['Content-Disposition'] = f'attachment; filename="{project_id}.json"'
+        return response

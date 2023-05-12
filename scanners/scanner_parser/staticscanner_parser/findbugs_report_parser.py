@@ -100,11 +100,7 @@ def xml_parser(root, project_id, scan_id, username):
                 )
                 fp_lenth_match = len(false_p)
 
-                if fp_lenth_match == 1:
-                    false_positive = "Yes"
-                else:
-                    false_positive = "No"
-
+                false_positive = "Yes" if fp_lenth_match == 1 else "No"
                 save_all = StaticScanResultsDb(
                     vuln_id=vul_id,
                     date_time=date_time,
@@ -122,8 +118,6 @@ def xml_parser(root, project_id, scan_id, username):
                     username=username,
                     scanner='Findbugs',
                 )
-                save_all.save()
-
             else:
                 duplicate_vuln = "Yes"
 
@@ -144,7 +138,7 @@ def xml_parser(root, project_id, scan_id, username):
                     username=username,
                     scanner='Findbugs',
                 )
-                save_all.save()
+            save_all.save()
 
         if bug.tag == "BugPattern":
             for BugPattern in bug:
@@ -185,12 +179,7 @@ def xml_parser(root, project_id, scan_id, username):
             scanner='Findbugs'
         )
     trend_update(username=username)
-    subject = "Archery Tool Scan Status - Findbugs Report Uploaded"
-    message = (
-        "Findbugs Scanner has completed the scan "
-        "  %s <br> Total: %s <br>High: %s <br>"
-        "Medium: %s <br>Low %s"
-        % (scan_id, total_vul, total_high, total_medium, total_low)
-    )
+    message = f"Findbugs Scanner has completed the scan   {scan_id} <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - Findbugs Report Uploaded"
     email_sch_notify(subject=subject, message=message)

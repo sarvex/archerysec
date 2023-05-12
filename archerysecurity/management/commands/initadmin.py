@@ -23,11 +23,11 @@ from django.core.management.base import BaseCommand
 class Command(BaseCommand):
     def handle(self, *args, **options):
         if User.objects.count() == 0:
+            password = "admin"
             for user in settings.ADMINS:
                 username = user[0].replace(" ", "")
                 email = user[1]
-                password = "admin"
-                print("Creating user for %s (%s)" % (username, email))
+                print(f"Creating user for {username} ({email})")
                 User.objects.create_superuser(username, email, password)
         else:
             print("Admin accounts can only be initialized if no Accounts exist")

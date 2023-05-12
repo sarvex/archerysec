@@ -41,11 +41,7 @@ def all_manual_scan(username, project_id, query):
         ).aggregate(Sum("total_vul"))
 
         for key, value in all_manual_scan_scan.items():
-            if value is None:
-                all_manual_scan = "0"
-            else:
-                all_manual_scan = value
-
+            all_manual_scan = "0" if value is None else value
     elif query == "high":
 
         all_manual_scan_high = manual_scans_db.objects.filter(
@@ -53,33 +49,21 @@ def all_manual_scan(username, project_id, query):
         ).aggregate(Sum("high_vul"))
 
         for key, value in all_manual_scan_high.items():
-            if value is None:
-                all_manual_scan = "0"
-            else:
-                all_manual_scan = value
-
+            all_manual_scan = "0" if value is None else value
     elif query == "medium":
         all_manual_scan_medium = manual_scans_db.objects.filter(
             username=username, project_id=project_id
         ).aggregate(Sum("medium_vul"))
 
         for key, value in all_manual_scan_medium.items():
-            if value is None:
-                all_manual_scan = "0"
-            else:
-                all_manual_scan = value
-
+            all_manual_scan = "0" if value is None else value
     elif query == "low":
         all_manual_scan_low = manual_scans_db.objects.filter(
             username=username, project_id=project_id
         ).aggregate(Sum("low_vul"))
 
         for key, value in all_manual_scan_low.items():
-            if value is None:
-                all_manual_scan = "0"
-            else:
-                all_manual_scan = value
-
+            all_manual_scan = "0" if value is None else value
     return all_manual_scan
 
 
@@ -91,11 +75,7 @@ def all_pentest_web(username, project_id, query):
         ).aggregate(Sum("total_vul"))
 
         for key, value in all_pentest_web_scan.items():
-            if value is None:
-                all_pentest_web = "0"
-            else:
-                all_pentest_web = value
-
+            all_pentest_web = "0" if value is None else value
     elif query == "high":
 
         all_pentest_web_high = manual_scans_db.objects.filter(
@@ -103,33 +83,21 @@ def all_pentest_web(username, project_id, query):
         ).aggregate(Sum("high_vul"))
 
         for key, value in all_pentest_web_high.items():
-            if value is None:
-                all_pentest_web = "0"
-            else:
-                all_pentest_web = value
-
+            all_pentest_web = "0" if value is None else value
     elif query == "medium":
         all_pentest_web_medium = manual_scans_db.objects.filter(
             username=username, pentest_type="web", project_id=project_id
         ).aggregate(Sum("medium_vul"))
 
         for key, value in all_pentest_web_medium.items():
-            if value is None:
-                all_pentest_web = "0"
-            else:
-                all_pentest_web = value
-
+            all_pentest_web = "0" if value is None else value
     elif query == "low":
         all_pentest_web_low = manual_scans_db.objects.filter(
             username=username, pentest_type="web", project_id=project_id
         ).aggregate(Sum("low_vul"))
 
         for key, value in all_pentest_web_low.items():
-            if value is None:
-                all_pentest_web = "0"
-            else:
-                all_pentest_web = value
-
+            all_pentest_web = "0" if value is None else value
     return all_pentest_web
 
 
@@ -141,11 +109,7 @@ def all_pentest_net(username, project_id, query):
         ).aggregate(Sum("total_vul"))
 
         for key, value in all_pentest_net_scan.items():
-            if value is None:
-                all_pentest_net = "0"
-            else:
-                all_pentest_net = value
-
+            all_pentest_net = "0" if value is None else value
     elif query == "high":
 
         all_pentest_net_high = manual_scans_db.objects.filter(
@@ -153,33 +117,21 @@ def all_pentest_net(username, project_id, query):
         ).aggregate(Sum("high_vul"))
 
         for key, value in all_pentest_net_high.items():
-            if value is None:
-                all_pentest_net = "0"
-            else:
-                all_pentest_net = value
-
+            all_pentest_net = "0" if value is None else value
     elif query == "medium":
         all_pentest_net_medium = manual_scans_db.objects.filter(
             username=username, pentest_type="network", project_id=project_id
         ).aggregate(Sum("medium_vul"))
 
         for key, value in all_pentest_net_medium.items():
-            if value is None:
-                all_pentest_net = "0"
-            else:
-                all_pentest_net = value
-
+            all_pentest_net = "0" if value is None else value
     elif query == "low":
         all_pentest_net_low = manual_scans_db.objects.filter(
             username=username, pentest_type="network", project_id=project_id
         ).aggregate(Sum("low_vul"))
 
         for key, value in all_pentest_net_low.items():
-            if value is None:
-                all_pentest_net = "0"
-            else:
-                all_pentest_net = value
-
+            all_pentest_net = "0" if value is None else value
     return all_pentest_net
 
 
@@ -212,11 +164,10 @@ def all_vuln(username, project_id, query):
             print(e)
             all_net_scan = 0
 
-        all_vuln = (
-                int(all_sast_scan)
-                + int(all_dast_scan)
-                + int(all_net_scan)
-                + int(all_manual_scan(username=username, project_id=project_id, query=query))
+        all_vuln = ((all_sast_scan + all_dast_scan) + all_net_scan) + int(
+            all_manual_scan(
+                username=username, project_id=project_id, query=query
+            )
         )
     elif query == "high":
         try:
@@ -241,11 +192,10 @@ def all_vuln(username, project_id, query):
         except Exception as e:
             all_net_scan = 0
 
-        all_vuln = (
-                int(all_sast_scan)
-                + int(all_dast_scan)
-                + int(all_net_scan)
-                + int(all_manual_scan(username=username, project_id=project_id, query=query))
+        all_vuln = ((all_sast_scan + all_dast_scan) + all_net_scan) + int(
+            all_manual_scan(
+                username=username, project_id=project_id, query=query
+            )
         )
     elif query == "medium":
 
@@ -274,11 +224,10 @@ def all_vuln(username, project_id, query):
             print(e)
             all_net_scan = 0
 
-        all_vuln = (
-                int(all_sast_scan)
-                + int(all_dast_scan)
-                + int(all_net_scan)
-                + int(all_manual_scan(username=username, project_id=project_id, query=query))
+        all_vuln = ((all_sast_scan + all_dast_scan) + all_net_scan) + int(
+            all_manual_scan(
+                username=username, project_id=project_id, query=query
+            )
         )
     elif query == "low":
         try:
@@ -305,11 +254,10 @@ def all_vuln(username, project_id, query):
             print(e)
             all_net_scan = 0
 
-        all_vuln = (
-                int(all_sast_scan)
-                + int(all_dast_scan)
-                + int(all_net_scan)
-                + int(all_manual_scan(username=username, project_id=project_id, query=query))
+        all_vuln = ((all_sast_scan + all_dast_scan) + all_net_scan) + int(
+            all_manual_scan(
+                username=username, project_id=project_id, query=query
+            )
         )
     return all_vuln
 
@@ -464,42 +412,26 @@ def all_inspec(username, project_id, query):
             aggregate(Sum('total_vuln'))
 
         for key, value in all_inspec_scan.items():
-            if value is None:
-                all_inspec = '0'
-            else:
-                all_inspec = value
-
+            all_inspec = '0' if value is None else value
     elif query == 'failed':
 
         all_inspec_high = inspec_scan_db.objects.filter(username=username, project_id=project_id). \
             aggregate(Sum('inspec_failed'))
 
         for key, value in all_inspec_high.items():
-            if value is None:
-                all_inspec = '0'
-            else:
-                all_inspec = value
-
+            all_inspec = '0' if value is None else value
     elif query == 'passed':
         all_inspec_medium = inspec_scan_db.objects.filter(username=username, project_id=project_id). \
             aggregate(Sum('inspec_passed'))
 
         for key, value in all_inspec_medium.items():
-            if value is None:
-                all_inspec = '0'
-            else:
-                all_inspec = value
-
+            all_inspec = '0' if value is None else value
     elif query == 'skipped':
         all_inspec_low = inspec_scan_db.objects.filter(username=username, project_id=project_id). \
             aggregate(Sum('inspec_skipped'))
 
         for key, value in all_inspec_low.items():
-            if value is None:
-                all_inspec = '0'
-            else:
-                all_inspec = value
-
+            all_inspec = '0' if value is None else value
     return all_inspec
 
 
@@ -510,32 +442,20 @@ def all_dockle(username, project_id, query):
             aggregate(Sum('total_vuln'))
 
         for key, value in all_dockle_scan.items():
-            if value is None:
-                all_dockle = '0'
-            else:
-                all_dockle = value
-
+            all_dockle = '0' if value is None else value
     elif query == 'fatal':
 
         all_dockle_high = dockle_scan_db.objects.filter(username=username, project_id=project_id). \
             aggregate(Sum('dockle_fatal'))
 
         for key, value in all_dockle_high.items():
-            if value is None:
-                all_dockle = '0'
-            else:
-                all_dockle = value
-
+            all_dockle = '0' if value is None else value
     elif query == 'info':
         all_dockle_medium = dockle_scan_db.objects.filter(username=username, project_id=project_id). \
             aggregate(Sum('dockle_info'))
 
         for key, value in all_dockle_medium.items():
-            if value is None:
-                all_dockle = '0'
-            else:
-                all_dockle = value
-
+            all_dockle = '0' if value is None else value
     return all_dockle
 
 
@@ -706,9 +626,9 @@ def all_vuln_count_data(username, project_id, query):
         net_false_positive = NetworkScanResultsDb.objects.filter(username=username, false_positive='Yes',
                                                                  project_id=project_id)
 
-        all_data = int(len(web_false_positive)) + \
-                   int(len(sast_false_positive)) + \
-                   int(len(net_false_positive))
+        all_data = (len(web_false_positive) + len(sast_false_positive)) + len(
+            net_false_positive
+        )
 
     elif query == 'Closed':
         web_closed_vuln = WebScanResultsDb.objects.filter(username=username,
@@ -726,10 +646,11 @@ def all_vuln_count_data(username, project_id, query):
         pentest_closed_vuln = manual_scan_results_db.objects.filter(username=username,
                                                                     vuln_status='Closed',
                                                                     project_id=project_id)
-        all_data = int(len(web_closed_vuln)) + \
-                   int(len(net_closed_vuln)) + \
-                   int(len(sast_closed_vuln)) + \
-                   int(len(pentest_closed_vuln))
+        all_data = (
+            (len(web_closed_vuln) + len(net_closed_vuln))
+            + len(sast_closed_vuln)
+            + len(pentest_closed_vuln)
+        )
 
 
     elif query == 'Open':
@@ -747,9 +668,10 @@ def all_vuln_count_data(username, project_id, query):
                                                                   vuln_status='Open',
                                                                   project_id=project_id)
         # add your scanner name here <scannername>
-        all_data = int(len(web_open_vuln)) + \
-                   int(len(net_open_vuln)) + \
-                   int(len(sast_open_vuln)) + \
-                   int(len(pentest_open_vuln))
+        all_data = (
+            (len(web_open_vuln) + len(net_open_vuln))
+            + len(sast_open_vuln)
+            + len(pentest_open_vuln)
+        )
 
     return all_data

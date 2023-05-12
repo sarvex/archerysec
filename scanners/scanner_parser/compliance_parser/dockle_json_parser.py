@@ -44,14 +44,11 @@ def dockle_report_json(data, project_id, scan_id, username):
         if level == "FATAL":
             vul_col = "danger"
 
-        elif level == "PASS":
-            vul_col = "warning"
-
-        elif level == "WARN":
-            vul_col = "warning"
-
         elif level == "INFO":
             vul_col = "info"
+
+        elif level in ["PASS", "WARN"]:
+            vul_col = "warning"
 
         vul_id = uuid.uuid4()
 
@@ -87,12 +84,7 @@ def dockle_report_json(data, project_id, scan_id, username):
         dockle_pass=dockle_passed,
         total_dup=total_duplicate,
     )
-    subject = "Archery Tool Scan Status - dockle Report Uploaded"
-    message = (
-        "dockle Scanner has completed the scan "
-        "  %s <br> Total: %s <br>Failed: %s <br>"
-        "failed: %s <br>Skipped %s"
-        % (scan_id, total_vul, dockle_failed, dockle_warn, dockle_passed)
-    )
+    message = f"dockle Scanner has completed the scan   {scan_id} <br> Total: {total_vul} <br>Failed: {dockle_failed} <br>failed: {dockle_warn} <br>Skipped {dockle_passed}"
 
+    subject = "Archery Tool Scan Status - dockle Report Uploaded"
     email_sch_notify(subject=subject, message=message)

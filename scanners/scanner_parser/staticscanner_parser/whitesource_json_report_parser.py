@@ -85,10 +85,7 @@ def whitesource_report_json(data, project_id, scan_id, username):
                 username=username, false_positive_hash=duplicate_hash
             )
             fp_lenth_match = len(false_p)
-            if fp_lenth_match == 1:
-                false_positive = "Yes"
-            else:
-                false_positive = "No"
+            false_positive = "Yes" if fp_lenth_match == 1 else "No"
             save_all = StaticScanResultsDb(
                 vuln_id=vul_id,
                 scan_id=scan_id,
@@ -107,8 +104,6 @@ def whitesource_report_json(data, project_id, scan_id, username):
                 username=username,
                 scanner='Whitesource'
             )
-            save_all.save()
-
         else:
             duplicate_vuln = "Yes"
 
@@ -130,7 +125,7 @@ def whitesource_report_json(data, project_id, scan_id, username):
                 username=username,
                 scanner='Whitesource'
             )
-            save_all.save()
+        save_all.save()
 
     all_findbugs_data = StaticScanResultsDb.objects.filter(
         username=username, scan_id=scan_id, false_positive="No"
@@ -157,12 +152,7 @@ def whitesource_report_json(data, project_id, scan_id, username):
         scanner='Whitesource'
     )
     trend_update(username=username)
-    subject = "Archery Tool Scan Status - whitesource Report Uploaded"
-    message = (
-        "whitesource Scanner has completed the scan "
-        "  %s <br> Total: %s <br>High: %s <br>"
-        "Medium: %s <br>Low %s"
-        % ("whitesource", total_vul, total_high, total_medium, total_low)
-    )
+    message = f"whitesource Scanner has completed the scan   whitesource <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - whitesource Report Uploaded"
     email_sch_notify(subject=subject, message=message)

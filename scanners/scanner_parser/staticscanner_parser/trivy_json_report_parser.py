@@ -116,7 +116,7 @@ def trivy_report_json(data, project_id, scan_id, username):
 
             vul_id = uuid.uuid4()
 
-            dup_data = str(VulnerabilityID) + str(Severity) + str(PkgName)
+            dup_data = VulnerabilityID + Severity + PkgName
 
             duplicate_hash = hashlib.sha256(dup_data.encode("utf-8")).hexdigest()
 
@@ -133,11 +133,7 @@ def trivy_report_json(data, project_id, scan_id, username):
                 )
                 fp_lenth_match = len(false_p)
 
-                if fp_lenth_match == 1:
-                    false_positive = "Yes"
-                else:
-                    false_positive = "No"
-
+                false_positive = "Yes" if fp_lenth_match == 1 else "No"
                 save_all = StaticScanResultsDb(
                     vuln_id=vul_id,
                     scan_id=scan_id,
@@ -145,7 +141,16 @@ def trivy_report_json(data, project_id, scan_id, username):
                     project_id=project_id,
                     fileName=PkgName,
                     title=VulnerabilityID,
-                    description=str(Description) + str(Title) + '\n\n' + str(VulnerabilityID) + '\n\n' + str(PkgName) + '\n\n' + str(InstalledVersion) + '\n\n' + str(FixedVersion),
+                    description=Description
+                    + Title
+                    + '\n\n'
+                    + VulnerabilityID
+                    + '\n\n'
+                    + PkgName
+                    + '\n\n'
+                    + InstalledVersion
+                    + '\n\n'
+                    + FixedVersion,
                     severity=Severity,
                     references=References,
                     severity_color=vul_col,
@@ -154,10 +159,8 @@ def trivy_report_json(data, project_id, scan_id, username):
                     vuln_duplicate=duplicate_vuln,
                     false_positive=false_positive,
                     username=username,
-                    scanner='Trivy'
+                    scanner='Trivy',
                 )
-                save_all.save()
-
             else:
                 duplicate_vuln = "Yes"
 
@@ -168,7 +171,16 @@ def trivy_report_json(data, project_id, scan_id, username):
                     project_id=project_id,
                     fileName=PkgName,
                     title=VulnerabilityID,
-                    description=str(Description) + str(Title) + '\n\n' + str(VulnerabilityID) + '\n\n' + str(PkgName) + '\n\n' + str(InstalledVersion) + '\n\n' + str(FixedVersion),
+                    description=Description
+                    + Title
+                    + '\n\n'
+                    + VulnerabilityID
+                    + '\n\n'
+                    + PkgName
+                    + '\n\n'
+                    + InstalledVersion
+                    + '\n\n'
+                    + FixedVersion,
                     severity=Severity,
                     references=References,
                     severity_color=vul_col,
@@ -177,9 +189,9 @@ def trivy_report_json(data, project_id, scan_id, username):
                     vuln_duplicate=duplicate_vuln,
                     false_positive='Duplicate',
                     username=username,
-                    scanner='Trivy'
+                    scanner='Trivy',
                 )
-                save_all.save()
+            save_all.save()
 
         all_findbugs_data = StaticScanResultsDb.objects.filter(
             username=username, scan_id=scan_id, false_positive="No"
@@ -206,12 +218,7 @@ def trivy_report_json(data, project_id, scan_id, username):
             scanner='Trivy'
         )
     trend_update(username=username)
-    subject = "Archery Tool Scan Status - Trivy Report Uploaded"
-    message = (
-        "Trivy Scanner has completed the scan "
-        "  %s <br> Total: %s <br>High: %s <br>"
-        "Medium: %s <br>Low %s"
-        % (Target, total_vul, total_high, total_medium, total_low)
-    )
+    message = f"Trivy Scanner has completed the scan   {Target} <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - Trivy Report Uploaded"
     email_sch_notify(subject=subject, message=message)

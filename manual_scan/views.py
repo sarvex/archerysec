@@ -382,8 +382,10 @@ def del_vuln(request):
         )
 
         return HttpResponseRedirect(
-            reverse("manual_scan:vuln_list")
-            + "?scan_id=%s&project_id=%s" % (scan_id, project_id)
+            (
+                reverse("manual_scan:vuln_list")
+                + f"?scan_id={scan_id}&project_id={project_id}"
+            )
         )
 
 
@@ -393,7 +395,6 @@ def del_scan(request):
     :param request:
     :return:
     """
-    username = request.user.username
     if request.method == "POST":
         get_scan_id = request.POST.get("scan_id")
 
@@ -401,6 +402,7 @@ def del_scan(request):
         value = scan_item.replace(" ", "")
         value_split = value.split(",")
         split_length = value_split.__len__()
+        username = request.user.username
         for i in range(0, split_length):
             scan_id = value_split.__getitem__(i)
 

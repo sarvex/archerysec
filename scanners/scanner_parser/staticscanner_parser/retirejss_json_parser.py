@@ -66,13 +66,13 @@ def retirejs_report_json(data, project_id, scan_id, username):
                     for cve_v in value:
                         global cve
                         cve = cve_v
-                if key == "issue":
-                    global issue
-                    issue = value
-                if key == "bug":
+                elif key == "bug":
                     global bug
                     bug = value
-                if key == "summary":
+                elif key == "issue":
+                    global issue
+                    issue = value
+                elif key == "summary":
                     global summary
                     summary = value
         for infos in data:
@@ -108,10 +108,10 @@ def retirejs_report_json(data, project_id, scan_id, username):
         )
         lenth_match = len(match_dup)
 
-        if lenth_match == 1:
-            duplicate_vuln = "Yes"
-        elif lenth_match == 0:
+        if lenth_match == 0:
             duplicate_vuln = "No"
+        elif lenth_match == 1:
+            duplicate_vuln = "Yes"
         else:
             duplicate_vuln = "None"
 
@@ -120,10 +120,7 @@ def retirejs_report_json(data, project_id, scan_id, username):
         )
         fp_lenth_match = len(false_p)
 
-        if fp_lenth_match == 1:
-            false_positive = "Yes"
-        else:
-            false_positive = "No"
+        false_positive = "Yes" if fp_lenth_match == 1 else "No"
         save_all = StaticScanResultsDb(
             scan_id=scan_id,
             date_time=date_time,

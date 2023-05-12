@@ -15,6 +15,7 @@
 # This file is part of ArcherySec Project.
 """ Author: Anand Tiwari """
 
+
 from __future__ import unicode_literals
 
 import hashlib
@@ -51,7 +52,7 @@ from scanners.scanner_parser.network_scanner import (Nessus_Parser,
 from scanners.scanner_plugin.network_scanner.openvas_plugin import (
     OpenVAS_Plugin, vuln_an_id)
 
-api_data = os.getcwd() + "/" + "apidata.json"
+api_data = f"{os.getcwd()}/apidata.json"
 
 status = ""
 name = ""
@@ -84,7 +85,6 @@ def email_notify(user, subject, message):
         send_mail(subject, message, email_from, recipient_list)
     except Exception as e:
         notify.send(user, recipient=user, verb="Email Settings Not Configured")
-        pass
 
 
 def list_scans(request):
@@ -164,7 +164,8 @@ def list_vuln_info(request):
             total_dup=total_dup
         )
         return HttpResponseRedirect(
-            reverse("networkscanners:list_vuln_info") + "?scan_id=%s&ip=%s&scanner=%s" % (scan_id, ip, scanner)
+            reverse("networkscanners:list_vuln_info")
+            + f"?scan_id={scan_id}&ip={ip}&scanner={scanner}"
         )
 
     vuln_data = NetworkScanResultsDb.objects.filter(
@@ -252,7 +253,8 @@ def vuln_delete(request):
             info_vul=total_info,
         )
         return HttpResponseRedirect(
-            reverse("networkscanners:list_vuln") + "?scan_id=%s&scanner=%s" % (scan_id, scanner)
+            reverse("networkscanners:list_vuln")
+            + f"?scan_id={scan_id}&scanner={scanner}"
         )
 
 
@@ -279,9 +281,9 @@ def openvas_scanner(scan_ip, project_id, sel_profile, username):
         return
 
     notify.send(user, recipient=user, verb="OpenVAS Scan Started")
-    subject = "Archery Tool Notification"
     message = "OpenVAS Scan Started"
 
+    subject = "Archery Tool Notification"
     email_notify(user=user, subject=subject, message=message)
     scan_id, target_id = openvas.scan_launch(scanner)
     date_time = datetime.now()
@@ -313,12 +315,7 @@ def openvas_scanner(scan_ip, project_id, sel_profile, username):
         total_low = openvas.low_vul
 
     subject = "Archery Tool Notification"
-    message = (
-        "OpenVAS Scan Completed  <br>"
-        "Total: %s  <br>Total High: %s <br>"
-        "Total Medium: %s  <br>Total Low %s"
-        % (all_vuln, total_high, total_medium, total_low)
-    )
+    message = f"OpenVAS Scan Completed  <br>Total: {all_vuln}  <br>Total High: {total_high} <br>Total Medium: {total_medium}  <br>Total Low {total_low}"
 
     email_notify(user=user, subject=subject, message=message)
 
@@ -389,10 +386,7 @@ def openvas_details(request):
     setting_id = uuid.uuid4()
     save_openvas_setting = save_settings.SaveSettings(api_data, username=username)
     if request.method == "POST":
-        if request.POST.get("openvas_enabled") == "on":
-            openvas_enabled = True
-        else:
-            openvas_enabled = False
+        openvas_enabled = request.POST.get("openvas_enabled") == "on"
         openvas_host = request.POST.get("openvas_host")
         openvas_port = request.POST.get("openvas_port")
         openvas_user = request.POST.get("openvas_user")
@@ -450,10 +444,7 @@ def openvas_setting(request):
     openvas_host = load_openvas_setting.openvas_host()
     openvas_port = load_openvas_setting.openvas_port()
     openvas_enabled = load_openvas_setting.openvas_enabled()
-    if openvas_enabled:
-        openvas_enabled = "True"
-    else:
-        openvas_enabled = "False"
+    openvas_enabled = "True" if openvas_enabled else "False"
     openvas_user = load_openvas_setting.openvas_username()
     openvas_password = load_openvas_setting.openvas_pass()
     return render(
@@ -483,12 +474,12 @@ def xml_upload(request):
         xml_file = request.FILES["xmlfile"]
         scan_ip = request.POST.get("scan_url")
         scan_id = uuid.uuid4()
-        scan_status = "100"
         if scanner == "openvas":
             date_time = datetime.now()
             tree = ET.parse(xml_file)
             root_xml = tree.getroot()
             hosts = OpenVas_Parser.get_hosts(root_xml)
+            scan_status = "100"
             for host in hosts:
                 scan_dump = NetworkScanDb(
                     ip=host,
@@ -596,8 +587,6 @@ def net_scan_schedule(request):
             if scanner == "open_vas":
                 if periodic_task_value == "None":
                     my_task = task(target, project_id, scanner, schedule=dt_obj)
-                    task_id = my_task.id
-                    print("Savedddddd taskid"), task_id
                 else:
                     my_task = task(
                         target,
@@ -606,9 +595,8 @@ def net_scan_schedule(request):
                         repeat=periodic_time,
                         repeat_until=None,
                     )
-                    task_id = my_task.id
-                    print("Savedddddd taskid"), task_id
-
+                task_id = my_task.id
+                print("Savedddddd taskid"), task_id
             save_scheadule = task_schedule_db(
                 task_id=task_id,
                 target=target,
@@ -688,18 +676,9 @@ def nv_details(request):
     """
     save_nv_setting = save_settings.SaveSettings(api_data, username=username)
     if request.method == "POST":
-        if str(request.POST.get("nv_enabled")) == "on":
-            nv_enabled = True
-        else:
-            nv_enabled = False
-        if str(request.POST.get("nv_online")) == "on":
-            nv_online = True
-        else:
-            nv_online = False
-        if str(request.POST.get("nv_version")) == "on":
-            nv_version = True
-        else:
-            nv_version = False
+        nv_enabled = str(request.POST.get("nv_enabled")) == "on"
+        nv_online = str(request.POST.get("nv_online")) == "on"
+        nv_version = str(request.POST.get("nv_version")) == "on"
         nv_timing = int(str(request.POST.get("nv_timing")))
         if nv_timing > 5:
             nv_timing = 5

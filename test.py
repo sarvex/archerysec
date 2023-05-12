@@ -17,28 +17,20 @@ for data in root:
             continue
         for ReportItem in reportHost.iter("ReportItem"):
             for key, value in ReportItem.attrib.items():
-                if key == "pluginName":
-                    pluginName = value
-                    # print ("pluginName = "+str(value))
-                if key == "pluginID":
-                    pluginID = value
-                    # print ("pluginID = "+str(value))
-                if key == "protocol":
-                    protocol = value
-                    # print ("protocol = "+str(value))
-                if key == "severity":
-                    severity = value
-                    # print ("severity = "+str(value))
-                if key == "svc_name":
-                    svc_name = value
-                    # print ("svc_name = "+str(value))
                 if key == "pluginFamily":
                     pluginFamily = value
-                    # print ("pluginFamily = "+str(value))
-                if key == "port":
+                elif key == "pluginID":
+                    pluginID = value
+                elif key == "pluginName":
+                    pluginName = value
+                elif key == "port":
                     port = value
-                    # print ("port = "+str(value))
-
+                elif key == "protocol":
+                    protocol = value
+                elif key == "severity":
+                    severity = value
+                elif key == "svc_name":
+                    svc_name = value
             try:
                 agent = ReportItem.find("agent").text
             except:

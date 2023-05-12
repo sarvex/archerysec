@@ -67,7 +67,7 @@ from webscanners.models import (WebScansDb, cookie_db,
 from webscanners.zapscanner.views import launch_schudle_zap_scan
 import uuid
 
-setting_file = os.getcwd() + "/" + "apidata.json"
+setting_file = f"{os.getcwd()}/apidata.json"
 
 # All global variable
 spider_status = "0"

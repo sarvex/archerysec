@@ -48,7 +48,6 @@ def email_notify(user, subject, message):
         send_mail(subject, message, email_from, recipient_list)
     except Exception as e:
         notify.send(user, recipient=user, verb="Email Settings Not Configured")
-        pass
 
 
 class burp_scans(object):
@@ -123,7 +122,7 @@ class burp_scans(object):
         )
         scan_dump.save()
 
-        host = "http://" + burp_host + ":" + burp_port + "/"
+        host = f"http://{burp_host}:{burp_port}/"
         bi = burpscanner.BurpApi(host, burp_api_key)
         data = '{"urls":["%s"]}' % self.scan_url
         response = bi.scan(data)
@@ -173,11 +172,11 @@ class burp_scans(object):
         """
 
         global name, origin, confidence, caption, \
-            type_index, internal_data, \
-            serial_number, path, severity, \
-            url, request_type, request_datas, \
-            response_type, response_datas, was_redirect_followed, issue_description, \
-            issue_remediation, issue_reference, issue_vulnerability_classifications
+                type_index, internal_data, \
+                serial_number, path, severity, \
+                url, request_type, request_datas, \
+                response_type, response_datas, was_redirect_followed, issue_description, \
+                issue_remediation, issue_reference, issue_vulnerability_classifications
 
         for data in scan_data:
             for key, value in data['issue'].items():
@@ -262,10 +261,10 @@ class burp_scans(object):
                                                            dup_hash=duplicate_hash).values('dup_hash').distinct()
             lenth_match = len(match_dup)
 
-            if lenth_match == 1:
-                duplicate_vuln = 'Yes'
-            elif lenth_match == 0:
+            if lenth_match == 0:
                 duplicate_vuln = 'No'
+            elif lenth_match == 1:
+                duplicate_vuln = 'Yes'
             else:
                 duplicate_vuln = 'None'
 
@@ -273,15 +272,23 @@ class burp_scans(object):
                                                          false_positive_hash=duplicate_hash)
             fp_lenth_match = len(false_p)
 
-            details = str(issue_description) + str('\n') + str(request_datas) + str('\n\n') + str(response_datas) + str(
-                '\n\n') + str('\n\n') + str(issue_description) + str('\n\n') + str(issue_vulnerability_classifications)
+            details = (
+                (
+                    (
+                        str(issue_description)
+                        + '\n'
+                        + str(request_datas)
+                        + '\n\n'
+                        + str(response_datas)
+                        + '\n\n'
+                    )
+                    + '\n\n'
+                )
+                + str(issue_description)
+                + '\n\n'
+            ) + str(issue_vulnerability_classifications)
             global false_positive
-            if fp_lenth_match == 1:
-                false_positive = "Yes"
-            elif lenth_match == 0:
-                false_positive = "No"
-            else:
-                false_positive = "No"
+            false_positive = "Yes" if fp_lenth_match == 1 else "No"
             date_time = datetime.now()
             try:
                 data_dump = WebScanResultsDb(

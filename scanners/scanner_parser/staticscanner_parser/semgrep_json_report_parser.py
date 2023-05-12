@@ -44,10 +44,9 @@ def semgrep_report_json(data, project_id, scan_id, username):
     :return:
     """
     date_time = datetime.now()
-    vul_col = ""
-
     vuln = data["results"]
 
+    vul_col = ""
     for vuln_data in vuln:
         try:
             check_id = vuln_data["check_id"]
@@ -108,7 +107,7 @@ def semgrep_report_json(data, project_id, scan_id, username):
 
         vul_id = uuid.uuid4()
 
-        dup_data = str(check_id) + str(severity) + str(path)
+        dup_data = check_id + severity + path
 
         duplicate_hash = hashlib.sha256(dup_data.encode("utf-8")).hexdigest()
 
@@ -125,11 +124,7 @@ def semgrep_report_json(data, project_id, scan_id, username):
             )
             fp_lenth_match = len(false_p)
 
-            if fp_lenth_match == 1:
-                false_positive = "Yes"
-            else:
-                false_positive = "No"
-
+            false_positive = "Yes" if fp_lenth_match == 1 else "No"
             save_all = StaticScanResultsDb(
                 vuln_id=vul_id,
                 scan_id=scan_id,
@@ -143,12 +138,20 @@ def semgrep_report_json(data, project_id, scan_id, username):
                 false_positive=false_positive,
                 fileName=path,
                 severity=severity,
-                description=str(message) + '\n\n' + str(check_id) + '\n\n' + str(end) + '\n\n' + str(metavars) + '\n\n' + str(metadata) + '\n\n' + str(lines),
+                description=message
+                + '\n\n'
+                + check_id
+                + '\n\n'
+                + end
+                + '\n\n'
+                + metavars
+                + '\n\n'
+                + metadata
+                + '\n\n'
+                + lines,
                 username=username,
-                scanner='Sempgrep'
+                scanner='Sempgrep',
             )
-            save_all.save()
-
         else:
             duplicate_vuln = "Yes"
 
@@ -165,11 +168,21 @@ def semgrep_report_json(data, project_id, scan_id, username):
                 false_positive='Duplicate',
                 fileName=path,
                 severity=severity,
-                description=str(message) + '\n\n' + str(check_id) + '\n\n' + str(end) + '\n\n' + str(metavars) + '\n\n' + str(metadata) + '\n\n' + str(lines),
+                description=message
+                + '\n\n'
+                + check_id
+                + '\n\n'
+                + end
+                + '\n\n'
+                + metavars
+                + '\n\n'
+                + metadata
+                + '\n\n'
+                + lines,
                 username=username,
-                scanner='Semgrep'
+                scanner='Semgrep',
             )
-            save_all.save()
+        save_all.save()
 
     all_findbugs_data = StaticScanResultsDb.objects.filter(
         username=username, scan_id=scan_id, false_positive="No"
@@ -196,11 +209,6 @@ def semgrep_report_json(data, project_id, scan_id, username):
     )
     trend_update(username=username)
     subject = "Archery Tool Scan Status - semgrep Report Uploaded"
-    message = (
-        "semgrep Scanner has completed the scan "
-        "  %s <br> Total: %s <br>High: %s <br>"
-        "Medium: %s <br>Low %s"
-        % ("semgrep", total_vul, total_high, total_medium, total_low)
-    )
+    message = f"semgrep Scanner has completed the scan   semgrep <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
     email_sch_notify(subject=subject, message=message)

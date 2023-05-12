@@ -99,11 +99,7 @@ class OpenVAS_Plugin:
         :return:
         """
         profile = None
-        if profile is None:
-            profile = "Full and fast"
-
-        else:
-            profile = self.sel_profile
+        profile = "Full and fast" if profile is None else self.sel_profile
         scan_id, target_id = scanner.launch_scan(
             target=str(self.scan_ip), profile=str(profile)
         )

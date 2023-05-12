@@ -44,10 +44,9 @@ def gitlabsast_report_json(data, project_id, scan_id, username):
     :return:
     """
     date_time = datetime.now()
-    vul_col = ""
-
     vuln = data["vulnerabilities"]
 
+    vul_col = ""
     for vuln_data in vuln:
 
         try:
@@ -103,17 +102,13 @@ def gitlabsast_report_json(data, project_id, scan_id, username):
         elif severity == "Low":
             vul_col = "info"
 
-        elif severity == "Unknown":
-            severity = "Low"
-            vul_col = "info"
-
-        elif severity == "Everything else":
+        elif severity in {"Unknown", "Everything else"}:
             severity = "Low"
             vul_col = "info"
 
         vul_id = uuid.uuid4()
 
-        dup_data = str(name) + str(severity) + str(file)
+        dup_data = name + severity + file
 
         duplicate_hash = hashlib.sha256(dup_data.encode("utf-8")).hexdigest()
 
@@ -130,18 +125,14 @@ def gitlabsast_report_json(data, project_id, scan_id, username):
             )
             fp_lenth_match = len(false_p)
 
-            if fp_lenth_match == 1:
-                false_positive = "Yes"
-            else:
-                false_positive = "No"
-
+            false_positive = "Yes" if fp_lenth_match == 1 else "No"
             save_all = StaticScanResultsDb(
                 vuln_id=vul_id,
                 scan_id=scan_id,
                 date_time=date_time,
                 project_id=project_id,
                 title=name,
-                description=str(description) + '\n\n' + str(scanner),
+                description=description + '\n\n' + scanner,
                 filePath=location,
                 fileName=file,
                 severity=severity,
@@ -151,9 +142,8 @@ def gitlabsast_report_json(data, project_id, scan_id, username):
                 vuln_duplicate=duplicate_vuln,
                 false_positive=false_positive,
                 username=username,
-                scanner='Gitlabsast'
+                scanner='Gitlabsast',
             )
-            save_all.save()
         else:
             duplicate_vuln = "Yes"
 
@@ -175,8 +165,7 @@ def gitlabsast_report_json(data, project_id, scan_id, username):
                 username=username,
                 scanner='Gitlabsast'
             )
-            save_all.save()
-
+        save_all.save()
     all_findbugs_data = StaticScanResultsDb.objects.filter(
         username=username, scan_id=scan_id, false_positive="No", vuln_duplicate="No"
     )
@@ -203,11 +192,6 @@ def gitlabsast_report_json(data, project_id, scan_id, username):
     )
     trend_update(username=username)
     subject = "Archery Tool Scan Status - GitLab SAST Report Uploaded"
-    message = (
-        "GitLab SAST Scanner has completed the scan "
-        "  %s <br> Total: %s <br>High: %s <br>"
-        "Medium: %s <br>Low %s"
-        % (Target, total_vul, total_high, total_medium, total_low)
-    )
+    message = f"GitLab SAST Scanner has completed the scan   {Target} <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
     email_sch_notify(subject=subject, message=message)

@@ -56,8 +56,7 @@ def checkmarx_report_xml(data, project_id, scan_id, username):
             result_data_all.append(dd.attrib)
             for d in dd.findall(".//Code"):
                 result = d.text
-                instance = {}
-                instance[file_name] = d.text
+                instance = {file_name: d.text}
                 code_data.append(instance)
         if severity == "High":
             vul_col = "danger"
@@ -83,11 +82,7 @@ def checkmarx_report_xml(data, project_id, scan_id, username):
                 username=username, false_positive_hash=duplicate_hash
             )
             fp_lenth_match = len(false_p)
-            if fp_lenth_match == 1:
-                false_positive = "Yes"
-            else:
-                false_positive = "No"
-
+            false_positive = "Yes" if fp_lenth_match == 1 else "No"
             save_all = StaticScanResultsDb(
                 vuln_id=vul_id,
                 scan_id=scan_id,
@@ -105,8 +100,6 @@ def checkmarx_report_xml(data, project_id, scan_id, username):
                 username=username,
                 scanner='Checkmarx'
             )
-            save_all.save()
-
         else:
             duplicate_vuln = "Yes"
 
@@ -127,7 +120,7 @@ def checkmarx_report_xml(data, project_id, scan_id, username):
                 username=username,
                 scanner='Checkmarx'
             )
-            save_all.save()
+        save_all.save()
 
     all_findbugs_data = StaticScanResultsDb.objects.filter(
         username=username, scan_id=scan_id, false_positive="No"
@@ -154,12 +147,7 @@ def checkmarx_report_xml(data, project_id, scan_id, username):
         scanner='Checkmarx'
     )
     trend_update(username=username)
-    subject = "Archery Tool Scan Status - checkmarx Report Uploaded"
-    message = (
-        "checkmarx Scanner has completed the scan "
-        "  %s <br> Total: %s <br>High: %s <br>"
-        "Medium: %s <br>Low %s"
-        % ("checkmarx", total_vul, total_high, total_medium, total_low)
-    )
+    message = f"checkmarx Scanner has completed the scan   checkmarx <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - checkmarx Report Uploaded"
     email_sch_notify(subject=subject, message=message)

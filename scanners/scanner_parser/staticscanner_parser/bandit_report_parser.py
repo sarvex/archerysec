@@ -60,65 +60,34 @@ def bandit_report_json(data, project_id, scan_id, username):
                 for key, value in res.items():
                     if key == "line_number":
                         global line_number
-                        if value is None:
-                            line_number = "NA"
-                        else:
-                            line_number = value
+                        line_number = "NA" if value is None else value
                     if key == "code":
                         global code
-                        if value is None:
-                            code = "NA"
-                        else:
-                            code = value
+                        code = "NA" if value is None else value
                     if key == "issue_confidence":
                         global issue_confidence
-                        if value is None:
-                            issue_confidence = "NA"
-                        else:
-                            issue_confidence = value
+                        issue_confidence = "NA" if value is None else value
                     if key == "line_range":
                         global line_range
-                        if value is None:
-                            line_range = "NA"
-                        else:
-                            line_range = value
+                        line_range = "NA" if value is None else value
                     if key == "test_id":
                         global test_id
-                        if value is None:
-                            test_id = "NA"
-                        else:
-                            test_id = value
+                        test_id = "NA" if value is None else value
                     if key == "issue_severity":
                         global issue_severity
-                        if value is None:
-                            issue_severity = "NA"
-                        else:
-                            issue_severity = value
+                        issue_severity = "NA" if value is None else value
                     if key == "issue_text":
                         global issue_text
-                        if value is None:
-                            issue_text = "NA"
-                        else:
-                            issue_text = value
+                        issue_text = "NA" if value is None else value
                     if key == "test_name":
                         global test_name
-                        if value is None:
-                            test_name = "NA"
-                        else:
-                            test_name = value
+                        test_name = "NA" if value is None else value
                     if key == "filename":
                         global filename
-                        if value is None:
-                            filename = "NA"
-                        else:
-                            filename = value
+                        filename = "NA" if value is None else value
                     if key == "more_info":
                         global more_info
-                        if value is None:
-                            more_info = "NA"
-                        else:
-                            more_info = value
-
+                        more_info = "NA" if value is None else value
                 date_time = datetime.now()
                 vul_id = uuid.uuid4()
 
@@ -154,11 +123,7 @@ def bandit_report_json(data, project_id, scan_id, username):
                     )
                     fp_lenth_match = len(false_p)
 
-                    if fp_lenth_match == 1:
-                        false_positive = "Yes"
-                    else:
-                        false_positive = "No"
-
+                    false_positive = "Yes" if fp_lenth_match == 1 else "No"
                     save_all = StaticScanResultsDb(
                         scan_id=scan_id,
                         date_time=date_time,
@@ -177,8 +142,6 @@ def bandit_report_json(data, project_id, scan_id, username):
                         username=username,
                         scanner='Bandit',
                     )
-                    save_all.save()
-
                 else:
                     duplicate_vuln = "Yes"
 
@@ -201,7 +164,7 @@ def bandit_report_json(data, project_id, scan_id, username):
                         scanner='Bandit',
 
                     )
-                    save_all.save()
+                save_all.save()
 
         all_bandit_data = StaticScanResultsDb.objects.filter(
             username=username, scan_id=scan_id, false_positive="No"
@@ -225,12 +188,7 @@ def bandit_report_json(data, project_id, scan_id, username):
             total_dup=total_duplicate,
         )
     trend_update(username=username)
-    subject = "Archery Tool Scan Status - Bandit Report Uploaded"
-    message = (
-        "Bandit Scanner has completed the scan "
-        "  %s <br> Total: %s <br>High: %s <br>"
-        "Medium: %s <br>Low %s"
-        % (scan_id, total_vul, total_high, total_medium, total_low)
-    )
+    message = f"Bandit Scanner has completed the scan   {scan_id} <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - Bandit Report Uploaded"
     email_sch_notify(subject=subject, message=message)

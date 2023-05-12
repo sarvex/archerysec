@@ -53,10 +53,7 @@ def npmaudit_report_json(data, project_id, scan_id, username):
         url = data["advisories"][vuln]["url"]
 
         findings = data["advisories"][vuln]["findings"]
-        vuln_versions = {}
-        for find in findings:
-            vuln_versions[find["version"]] = [find["paths"]]
-
+        vuln_versions = {find["version"]: [find["paths"]] for find in findings}
         if not title:
             title = "not found"
         if not found_by:
@@ -98,11 +95,7 @@ def npmaudit_report_json(data, project_id, scan_id, username):
             severity = "Medium"
             vul_col = "warning"
 
-        elif severity == "low":
-            severity = "Low"
-            vul_col = "info"
-
-        elif severity == "info":
+        elif severity in ["low", "info"]:
             severity = "Low"
             vul_col = "info"
 
@@ -125,11 +118,7 @@ def npmaudit_report_json(data, project_id, scan_id, username):
             )
             fp_lenth_match = len(false_p)
 
-            if fp_lenth_match == 1:
-                false_positive = "Yes"
-            else:
-                false_positive = "No"
-
+            false_positive = "Yes" if fp_lenth_match == 1 else "No"
             save_all = StaticScanResultsDb(
                 vuln_id=vul_id,
                 date_time=date_time,
@@ -154,8 +143,6 @@ def npmaudit_report_json(data, project_id, scan_id, username):
                 username=username,
                 scanner='Npmaudit'
             )
-            save_all.save()
-
         else:
             duplicate_vuln = "Yes"
 
@@ -183,7 +170,7 @@ def npmaudit_report_json(data, project_id, scan_id, username):
                 username=username,
                 scanner='Npmaudit'
             )
-            save_all.save()
+        save_all.save()
 
     all_findbugs_data = StaticScanResultsDb.objects.filter(
         username=username, scan_id=scan_id, false_positive="No"
@@ -209,12 +196,7 @@ def npmaudit_report_json(data, project_id, scan_id, username):
         scanner='Npmaudit'
     )
     trend_update(username=username)
-    subject = "Archery Tool Scan Status - Npmaudit Report Uploaded"
-    message = (
-            "Npmaudit Scanner has completed the scan "
-            "  %s <br> Total: %s <br>High: %s <br>"
-            "Medium: %s <br>Low %s"
-            % ("npm-audit", total_vul, total_high, total_medium, total_low)
-    )
+    message = f"Npmaudit Scanner has completed the scan   npm-audit <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - Npmaudit Report Uploaded"
     email_sch_notify(subject=subject, message=message)

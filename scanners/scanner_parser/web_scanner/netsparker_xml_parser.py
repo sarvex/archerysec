@@ -62,11 +62,7 @@ def xml_parser(root, project_id, scan_id, username):
                 vuln_type = vuln.text
 
             if vuln.tag == "severity":
-                if vuln.text == "Important":
-                    vuln_severity = "High"
-                else:
-                    vuln_severity = vuln.text
-
+                vuln_severity = "High" if vuln.text == "Important" else vuln.text
             if vuln.tag == "certainty":
                 vuln_certainty = vuln.text
 
@@ -148,13 +144,7 @@ def xml_parser(root, project_id, scan_id, username):
             fp_lenth_match = len(false_p)
 
             global false_positive
-            if fp_lenth_match == 1:
-                false_positive = "Yes"
-            elif lenth_match == 0:
-                false_positive = "No"
-            else:
-                false_positive = "No"
-
+            false_positive = "Yes" if fp_lenth_match == 1 else "No"
             dump_data = WebScanResultsDb(
                 scan_id=scan_id,
                 project_id=project_id,
@@ -174,7 +164,6 @@ def xml_parser(root, project_id, scan_id, username):
                 username=username,
                 scanner='Netsparker'
             )
-            dump_data.save()
         else:
             duplicate_vuln = "Yes"
 
@@ -197,8 +186,7 @@ def xml_parser(root, project_id, scan_id, username):
                 username=username,
                 scanner='Netsparker'
             )
-            dump_data.save()
-
+        dump_data.save()
     netsparker_all_vul = WebScanResultsDb.objects.filter(
         username=username, scan_id=scan_id, false_positive="No", scanner='Netsparker'
     )
@@ -225,12 +213,7 @@ def xml_parser(root, project_id, scan_id, username):
         scanner='Netsparker'
     )
     trend_update(username=username)
-    subject = "Archery Tool Scan Status - Netsparker Report Uploaded"
-    message = (
-            "Netsparker Scanner has completed the scan "
-            "  %s <br> Total: %s <br>High: %s <br>"
-            "Medium: %s <br>Low %s"
-            % (target, total_vul, total_high, total_medium, total_low)
-    )
+    message = f"Netsparker Scanner has completed the scan   {target} <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - Netsparker Report Uploaded"
     email_sch_notify(subject=subject, message=message)

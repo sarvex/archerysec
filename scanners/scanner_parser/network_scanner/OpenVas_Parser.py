@@ -53,42 +53,24 @@ def updated_xml_parser(root, project_id, scan_id, username):
         description, family, cvss_base, cve
     for openvas in root.findall(".//result"):
         for r in openvas:
-            if r.tag == "name":
-                global name
-                if r.text is None:
-                    name = "NA"
-                else:
-                    name = r.text
-            if r.tag == "host":
-                global host
-                if r.text is None:
-                    host = "NA"
-                else:
-                    host = r.text
-            if r.tag == "port":
-                global port
-                if r.text is None:
-                    port = "NA"
-                else:
-                    port = r.text
-            if r.tag == "threat":
-                global threat
-                if r.text is None:
-                    threat = "NA"
-                else:
-                    threat = r.text
-            if r.tag == "severity":
-                global severity
-                if r.text is None:
-                    severity = "NA"
-                else:
-                    severity = r.text
             if r.tag == "description":
                 global description
-                if r.text is None:
-                    description = "NA"
-                else:
-                    description = r.text
+                description = "NA" if r.text is None else r.text
+            elif r.tag == "host":
+                global host
+                host = "NA" if r.text is None else r.text
+            elif r.tag == "name":
+                global name
+                name = "NA" if r.text is None else r.text
+            elif r.tag == "port":
+                global port
+                port = "NA" if r.text is None else r.text
+            elif r.tag == "severity":
+                global severity
+                severity = "NA" if r.text is None else r.text
+            elif r.tag == "threat":
+                global threat
+                threat = "NA" if r.text is None else r.text
         date_time = datetime.now()
         vuln_id = uuid.uuid4()
         dup_data = name + host + severity + port
@@ -108,19 +90,13 @@ def updated_xml_parser(root, project_id, scan_id, username):
                 username=username, false_positive_hash=duplicate_hash
             )
             fp_lenth_match = len(false_p)
-            if fp_lenth_match == 1:
-                false_positive = "Yes"
-            else:
-                false_positive = "No"
+            false_positive = "Yes" if fp_lenth_match == 1 else "No"
             if threat == "High":
                 vuln_color = "danger"
+            elif threat in ["Low", "Log"]:
+                vuln_color = "info"
             elif threat == "Medium":
                 vuln_color = "warning"
-            elif threat == "Low":
-                vuln_color = "info"
-            elif threat == "Log":
-                vuln_color = "info"
-
             save_all = NetworkScanResultsDb(
                 scan_id=scan_id,
                 project_id=project_id,
@@ -176,14 +152,9 @@ def updated_xml_parser(root, project_id, scan_id, username):
             total_dup=total_duplicate,
         )
     trend_update(username=username)
-    subject = "Archery Tool Scan Status - OpenVAS Report Uploaded"
-    message = (
-            "OpenVAS Scanner has completed the scan "
-            "  %s <br> Total: %s <br>High: %s <br>"
-            "Medium: %s <br>Low %s"
-            % (scan_id, total_vul, total_high, total_medium, total_low)
-    )
+    message = f"OpenVAS Scanner has completed the scan   {scan_id} <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - OpenVAS Report Uploaded"
     email_sch_notify(subject=subject, message=message)
 
 
@@ -198,7 +169,7 @@ def get_hosts(root):
                 else:
                     host = r.text
                     if host in hosts:
-                        print("Already present " + host)
+                        print(f"Already present {host}")
                     else:
                         hosts.append(host)
     return hosts

@@ -59,11 +59,10 @@ def xml_parser(root, project_id, scan_id, username):
             if scaninfo.tag == "address":
                 ip = scaninfo.attrib
                 for key, value in ip.items():
-                    if key == "addrtype":
-                        if value == "ipv4":
-                            for key, value in ip.items():
-                                if key == "addr":
-                                    ip_address = value
+                    if key == "addrtype" and value == "ipv4":
+                        for key, value in ip.items():
+                            if key == "addr":
+                                ip_address = value
             for s in scaninfo:
                 # print s.tag
                 if s.tag == "port":
@@ -153,45 +152,44 @@ def xml_parser(root, project_id, scan_id, username):
             if scaninfo.tag == "address":
                 ip = scaninfo.attrib
                 for key, value in ip.items():
-                    if key == "addrtype":
-                        if value == "ipv4":
-                            for key, value in ip.items():
-                                if key == "addr":
-                                    ip_address = value
+                    if key == "addrtype" and value == "ipv4":
+                        for key, value in ip.items():
+                            if key == "addr":
+                                ip_address = value
 
-                                    all_data = nmap_result_db.objects.filter(
-                                        ip_address=ip_address, username=username
-                                    )
-                                    # for a in all_data:
-                                    #     global total_ports, ports_p
-                                    #     ports_p = a.port
-                                    total_ports = len(all_data)
-                                    # print(total_ports)
+                                all_data = nmap_result_db.objects.filter(
+                                    ip_address=ip_address, username=username
+                                )
+                                # for a in all_data:
+                                #     global total_ports, ports_p
+                                #     ports_p = a.port
+                                total_ports = len(all_data)
+                                # print(total_ports)
 
-                                    all_open_p = nmap_result_db.objects.filter(
-                                        username=username,
-                                        ip_address=ip_address,
-                                        state="open",
-                                    )
-                                    # for p in all_open_p:
-                                    #     global total_open_p
-                                    total_open_p = len(all_open_p)
-                                    # print(total_open_p)
+                                all_open_p = nmap_result_db.objects.filter(
+                                    username=username,
+                                    ip_address=ip_address,
+                                    state="open",
+                                )
+                                # for p in all_open_p:
+                                #     global total_open_p
+                                total_open_p = len(all_open_p)
+                                # print(total_open_p)
 
-                                    all_close_p = nmap_result_db.objects.filter(
-                                        username=username,
-                                        ip_address=ip_address,
-                                        state="closed",
-                                    )
-                                    total_close_p = len(all_close_p)
+                                all_close_p = nmap_result_db.objects.filter(
+                                    username=username,
+                                    ip_address=ip_address,
+                                    state="closed",
+                                )
+                                total_close_p = len(all_close_p)
 
-                                    save_scan = nmap_scan_db(
-                                        scan_id=scan_id,
-                                        project_id=project_id,
-                                        scan_ip=ip_address,
-                                        total_ports=total_ports,
-                                        total_open_ports=total_open_p,
-                                        total_close_ports=total_close_p,
-                                        username=username,
-                                    )
-                                    save_scan.save()
+                                save_scan = nmap_scan_db(
+                                    scan_id=scan_id,
+                                    project_id=project_id,
+                                    scan_ip=ip_address,
+                                    total_ports=total_ports,
+                                    total_open_ports=total_open_p,
+                                    total_close_ports=total_close_p,
+                                    username=username,
+                                )
+                                save_scan.save()

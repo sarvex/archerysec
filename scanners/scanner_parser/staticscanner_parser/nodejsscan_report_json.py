@@ -38,6 +38,7 @@ def nodejsscan_report_json(data, project_id, scan_id, username):
     """
     date_time = datetime.now()
     global vul_col, severity
+    subject = "Archery Tool Scan Status - Nodejsscan Report Uploaded"
     for vuln in data["sec_issues"]:
         for vuln_dat in data["sec_issues"][vuln]:
             with open(
@@ -85,11 +86,7 @@ def nodejsscan_report_json(data, project_id, scan_id, username):
                 )
                 fp_lenth_match = len(false_p)
 
-                if fp_lenth_match == 1:
-                    false_positive = "Yes"
-                else:
-                    false_positive = "No"
-
+                false_positive = "Yes" if fp_lenth_match == 1 else "No"
                 save_all = StaticScanResultsDb(
                     vuln_id=vul_id,
                     scan_id=scan_id,
@@ -108,8 +105,6 @@ def nodejsscan_report_json(data, project_id, scan_id, username):
                     username=username,
                     scanner='Nodejsscan'
                 )
-                save_all.save()
-
             else:
                 duplicate_vuln = "Yes"
 
@@ -131,7 +126,7 @@ def nodejsscan_report_json(data, project_id, scan_id, username):
                     username=username,
                     scanner='Nodejsscan'
                 )
-                save_all.save()
+            save_all.save()
 
         all_findbugs_data = StaticScanResultsDb.objects.filter(
             username=username, scan_id=scan_id, false_positive="No"
@@ -157,7 +152,6 @@ def nodejsscan_report_json(data, project_id, scan_id, username):
             scanner='Nodejsscan'
         )
         trend_update(username=username)
-        subject = "Archery Tool Scan Status - Nodejsscan Report Uploaded"
         message = (
             "Nodejsscan Scanner has completed the scan "
             "  %s <br> Total: %s <br>High: %s <br>"

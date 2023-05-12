@@ -79,21 +79,13 @@ def xml_parser(root, project_id, scan_id, username):
 
                 vuln_id = uuid.uuid4()
 
-            if Severity == "4":
-                Severity = "High"
-                vul_col = "danger"
-
-            elif Severity == "3":
+            if Severity in ["4", "3"]:
                 Severity = "High"
                 vul_col = "danger"
 
             elif Severity == "2":
                 Severity = "Medium"
                 vul_col = "warning"
-
-            elif Severity == "1":
-                Severity = "Low"
-                vul_col = "info"
 
             else:
                 Severity = "Low"
@@ -120,36 +112,27 @@ def xml_parser(root, project_id, scan_id, username):
                 fp_lenth_match = len(false_p)
 
                 global false_positive
-                if fp_lenth_match == 1:
-                    false_positive = "Yes"
-                elif lenth_match == 0:
-                    false_positive = "No"
-                else:
-                    false_positive = "No"
-
+                false_positive = "Yes" if fp_lenth_match == 1 else "No"
                 if Name is None:
                     continue
-                else:
-                    dump_data = WebScanResultsDb(
-                        scan_id=scan_id,
-                        vuln_id=vuln_id,
-                        project_id=project_id,
-                        url=url,
-                        date_time=date_time,
-                        title=Name,
-                        severity=Severity,
-                        severity_color=vul_col,
-                        description=str(Host) + str(Port) + str(SectionText) + str(AttackMethod),
-                        instance=VulnerableSession,
-                        false_positive=false_positive,
-                        vuln_status="Open",
-                        dup_hash=duplicate_hash,
-                        vuln_duplicate=duplicate_vuln,
-                        scanner='Webinspect',
-                        username=username,
-                    )
-                    dump_data.save()
-
+                dump_data = WebScanResultsDb(
+                    scan_id=scan_id,
+                    vuln_id=vuln_id,
+                    project_id=project_id,
+                    url=url,
+                    date_time=date_time,
+                    title=Name,
+                    severity=Severity,
+                    severity_color=vul_col,
+                    description=str(Host) + str(Port) + str(SectionText) + str(AttackMethod),
+                    instance=VulnerableSession,
+                    false_positive=false_positive,
+                    vuln_status="Open",
+                    dup_hash=duplicate_hash,
+                    vuln_duplicate=duplicate_vuln,
+                    scanner='Webinspect',
+                    username=username,
+                )
             else:
                 duplicate_vuln = "Yes"
 
@@ -171,7 +154,7 @@ def xml_parser(root, project_id, scan_id, username):
                     scanner='Webinspect',
                     username=username,
                 )
-                dump_data.save()
+            dump_data.save()
 
         webinspect_all_vul = WebScanResultsDb.objects.filter(
             username=username, scan_id=scan_id, false_positive="No"
@@ -200,11 +183,7 @@ def xml_parser(root, project_id, scan_id, username):
         )
     trend_update(username=username)
 
-    subject = "Archery Tool Scan Status - Webinspect Report Uploaded"
-    message = (
-        "Webinspect Scanner has completed the scan "
-        "  %s <br> Total: %s <br>High: %s <br>"
-        "Medium: %s <br>Low %s" % (Host, total_vul, total_high, total_medium, total_low)
-    )
+    message = f"Webinspect Scanner has completed the scan   {Host} <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - Webinspect Report Uploaded"
     email_sch_notify(subject=subject, message=message)

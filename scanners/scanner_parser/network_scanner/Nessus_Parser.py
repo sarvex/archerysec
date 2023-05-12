@@ -66,10 +66,10 @@ def updated_nessus_parser(root, project_id, scan_id, username):
 
         for reportHost in data.iter("ReportHost"):
             try:
+                scan_status = "100"
                 for key, value in reportHost.items():
                     target = value
                     scan_id = uuid.uuid4()
-                    scan_status = "100"
                     scan_dump = NetworkScanDb(
                         ip=target,
                         scan_id=scan_id,
@@ -160,10 +160,7 @@ def updated_nessus_parser(root, project_id, scan_id, username):
                             plugin_output = "NA"
                         vuln_id = uuid.uuid4()
 
-                        if risk_factor == "Critical":
-                            vuln_color = "danger"
-                            risk_factor = "High"
-                        elif risk_factor == "High":
+                        if risk_factor in {"Critical", "High"}:
                             vuln_color = "danger"
                             risk_factor = "High"
                         elif risk_factor == "Medium":
@@ -195,10 +192,7 @@ def updated_nessus_parser(root, project_id, scan_id, username):
                                 username=username, false_positive_hash=duplicate_hash
                             )
                             fp_lenth_match = len(false_p)
-                            if fp_lenth_match == 1:
-                                false_positive = "Yes"
-                            else:
-                                false_positive = "No"
+                            false_positive = "Yes" if fp_lenth_match == 1 else "No"
                             if risk_factor == "None":
                                 risk_factor = "Low"
 
@@ -221,8 +215,6 @@ def updated_nessus_parser(root, project_id, scan_id, username):
                                 scanner='Nessus',
                                 username=username,
                             )
-                            all_data_save.save()
-
                         else:
                             duplicate_vuln = "Yes"
 
@@ -245,7 +237,8 @@ def updated_nessus_parser(root, project_id, scan_id, username):
                                 scanner='Nessus',
                                 username=username,
                             )
-                            all_data_save.save()
+                        all_data_save.save()
+
             except:
                 continue
         for reportHost in data.iter("ReportHost"):
@@ -280,12 +273,7 @@ def updated_nessus_parser(root, project_id, scan_id, username):
             except:
                 continue
     trend_update(username=username)
-    subject = "Archery Tool Scan Status - Nessus Report Uploaded"
-    message = (
-            "Nessus Scanner has completed the scan "
-            "  %s <br> Total: %s <br>High: %s <br>"
-            "Medium: %s <br>Low %s"
-            % (scan_id, total_vul, total_high, total_medium, total_low)
-    )
+    message = f"Nessus Scanner has completed the scan   {scan_id} <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - Nessus Report Uploaded"
     email_sch_notify(subject=subject, message=message)

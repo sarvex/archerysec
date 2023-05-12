@@ -73,41 +73,22 @@ def burp_scan_data(root, project_id, scan_id, username):
             vuln_id = uuid.uuid4()
             if data.tag == "name":
                 global name
-                if data.text is None:
-                    name = "NA"
-                else:
-                    name = data.text
+                name = "NA" if data.text is None else data.text
             if data.tag == "host":
                 global host
-                if data.text is None:
-                    host = "NA"
-                else:
-                    host = data.text
+                host = "NA" if data.text is None else data.text
             if data.tag == "path":
                 global path
-                if data.text is None:
-                    path = "NA"
-                else:
-                    path = data.text
+                path = "NA" if data.text is None else data.text
             if data.tag == "location":
                 global location
-                if data.text is None:
-                    location = "NA"
-                else:
-                    location = data.text
+                location = "NA" if data.text is None else data.text
             if data.tag == "severity":
                 global severity
-                if data.text is None:
-                    severity = "NA"
-                else:
-                    severity = data.text
-
+                severity = "NA" if data.text is None else data.text
             if data.tag == "requestresponse":
                 global requestresponse
-                if data.text is None:
-                    requestresponse = "NA"
-                else:
-                    requestresponse = data.text
+                requestresponse = "NA" if data.text is None else data.text
                 for d in data:
                     req = d.tag
                     met = d.attrib
@@ -116,7 +97,7 @@ def burp_scan_data(root, project_id, scan_id, username):
                         reqst = d.text
                         request_datas = base64.b64decode(reqst)  # reqst
 
-                    if req == "response":
+                    elif req == "response":
                         global response_datas
                         res_dat = d.text
                         response_datas = base64.b64decode(res_dat)  # res_dat
@@ -128,31 +109,28 @@ def burp_scan_data(root, project_id, scan_id, username):
 
             if data.tag == "issueBackground":
                 global issue_description
-                if data.text is None:
-                    issue_description = "NA"
-                else:
-                    issue_description = data.text
+                issue_description = "NA" if data.text is None else data.text
             if data.tag == "remediationBackground":
                 global issue_remediation
-                if data.text is None:
-                    issue_remediation = "NA"
-                else:
-                    issue_remediation = data.text
+                issue_remediation = "NA" if data.text is None else data.text
             if data.tag == "references":
                 global issue_reference
-                if data.text is None:
-                    issue_reference = "NA"
-                else:
-                    issue_reference = data.text
+                issue_reference = "NA" if data.text is None else data.text
             if data.tag == "vulnerabilityClassifications":
                 global issue_vulnerability_classifications
-                if data.text is None:
-                    issue_vulnerability_classifications = "NA"
-                else:
-                    issue_vulnerability_classifications = data.text
-
-        details = str(issue_description) + str('\n') + str(request_datas) + str('\n\n') + str(response_datas) + str(
-            '\n\n') + str('\n\n') + str(issue_description) + str('\n\n') + str(issue_vulnerability_classifications)
+                issue_vulnerability_classifications = "NA" if data.text is None else data.text
+        details = (
+            str(issue_description)
+            + '\n'
+            + str(request_datas)
+            + '\n\n'
+            + str(response_datas)
+            + '\n\n'
+            + '\n\n'
+            + str(issue_description)
+            + '\n\n'
+            + str(issue_vulnerability_classifications)
+        )
 
         if severity == "High":
             vul_col = "danger"
@@ -187,13 +165,7 @@ def burp_scan_data(root, project_id, scan_id, username):
             fp_lenth_match = len(false_p)
 
             global false_positive
-            if fp_lenth_match == 1:
-                false_positive = "Yes"
-            elif lenth_match == 0:
-                false_positive = "No"
-            else:
-                false_positive = "No"
-
+            false_positive = "Yes" if fp_lenth_match == 1 else "No"
             url = host + location
 
             try:
@@ -273,13 +245,9 @@ def burp_scan_data(root, project_id, scan_id, username):
     )
     print(host)
     trend_update(username=username)
-    subject = "Archery Tool Scan Status - Burp Report Uploaded"
-    message = (
-            "Burp Scanner has completed the scan "
-            "  %s <br> Total: %s <br>High: %s <br>"
-            "Medium: %s <br>Low %s" % (host, total_vul, total_high, total_medium, total_low)
-    )
+    message = f"Burp Scanner has completed the scan   {host} <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - Burp Report Uploaded"
     email_sch_notify(subject=subject, message=message)
 
     try:

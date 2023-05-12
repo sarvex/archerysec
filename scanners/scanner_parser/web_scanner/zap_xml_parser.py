@@ -87,9 +87,6 @@ def xml_parser(username, root, project_id, scan_id):
             elif riskcode == "2":
                 vul_col = "warning"
                 risk = "Medium"
-            elif riskcode == "1":
-                vul_col = "info"
-                risk = "Low"
             else:
                 vul_col = "info"
                 risk = "Low"
@@ -143,11 +140,7 @@ def xml_parser(username, root, project_id, scan_id):
             )
             fp_lenth_match = len(false_p)
 
-            if fp_lenth_match == 1:
-                false_positive = "Yes"
-            else:
-                false_positive = "No"
-
+            false_positive = "Yes" if fp_lenth_match == 1 else "No"
     zap_all_vul = WebScanResultsDb.objects.filter(
         username=username, scan_id=scan_id, false_positive="No"
     )
@@ -185,12 +178,7 @@ def xml_parser(username, root, project_id, scan_id):
 
     trend_update(username=username)
 
-    subject = "Archery Tool Scan Status - ZAP Report Uploaded"
-    message = (
-        "ZAP Scanner has completed the scan "
-        "  %s <br> Total: %s <br>High: %s <br>"
-        "Medium: %s <br>Low %s"
-        % (scan_url, total_vul, total_high, total_medium, total_low)
-    )
+    message = f"ZAP Scanner has completed the scan   {scan_url} <br> Total: {total_vul} <br>High: {total_high} <br>Medium: {total_medium} <br>Low {total_low}"
 
+    subject = "Archery Tool Scan Status - ZAP Report Uploaded"
     email_sch_notify(subject=subject, message=message)
